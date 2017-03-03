@@ -3,7 +3,10 @@ package unionpay
 import "fmt"
 
 type ApiConfig struct {
-	Url string
+	Url         string
+	bizType     string
+	accessType  string
+	channelType string
 }
 
 // 用户数据
@@ -35,8 +38,7 @@ type CustomerInfo struct {
 
 // 订购类API
 type Order struct {
-	bizType string
-	url     string
+	c ApiConfig
 }
 
 // 初始化一个订购类
@@ -45,25 +47,26 @@ func NewOrder(c ApiConfig) (o Order, err error) {
 		err = fmt.Errorf("请先配置证书信息")
 		return
 	}
-	url := baseUrl
-	if c.Url != "" {
-		url = c.Url
+	if c.Url == "" {
+		c.Url = baseUrl
 	}
-	return Order{bizType: "001001", url: url}, nil
+	c.bizType = "001001"
+	c.channelType = "07"
+	c.accessType = "0"
+	return Order{c}, nil
 }
 
 // 实名认证接口
 func (n *Order) RealNameAuth(orderid string, accNo, bindid string, customer *CustomerInfo) (result interface{}, err error) {
-	request := sysParams()
+	request := sysParams(n.c)
 	request["txnType"] = "72"
 	request["txnSubType"] = "01"
 	request["bindId"] = bindid
-	request["bizType"] = n.bizType
 	request["txnTime"] = getTxnTime()
 	request["orderId"] = orderid
 	request["accNo"] = getaccNo(accNo)
 	request["customerInfo"] = getCustomerInfo(customer)
 	request["signature"], _ = Sign(request)
-	return POST(n.url+"/gateway/api/backTransReq.do", request)
+	return POST(n.c.Url+"/gateway/api/backTransReq.do", request)
 
 }

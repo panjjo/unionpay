@@ -32,32 +32,12 @@ type Cert struct {
 	EncryptId string
 }
 
-//初始化证书使用的配置
-type CertPathInfo struct {
-	// pfx 证书路径,和同时传入PrivatePath和CertPath 效果一样
-	PfxPath string
-
-	// pfx 证书的密码
-	PfxPwd string
-
-	// 验签私钥证书地址，传入pfx此路径可不传
-	// openssl pkcs12 -in xxxx.pfx -nodes -out server.pem 生成为原生格式pem 私钥
-	// openssl rsa -in server.pem -out server.key  生成为rsa格式私钥文件
-	PrivatePath string
-
-	// 验签证书地址,传入pfx此路径可以不传
-	// openssl pkcs12 -in xxxx.pfx -clcerts -nokeys -out key.cert
-	CertPath string
-
-	// 加密证书地址
-	EncryptCertPath string
-}
-
 // 根据配置加载证书信息
-func LoadCert(info *CertPathInfo) (err error) {
+func LoadCert(info *Config) (err error) {
 	certData = &Cert{}
 	certData.EncryptCert, err = ParseCertificateFromFile(info.EncryptCertPath)
 	if err != nil {
+		fmt.Println(info.EncryptCertPath)
 		err = fmt.Errorf("encryptCert ERR:%v", err)
 		return
 	}

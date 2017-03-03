@@ -10,37 +10,59 @@ type UnionpayData struct {
 }
 
 var (
-	accessType  string = "0"
-	merId       string
-	frontUrl    string
-	channelType string
-	encoding    string = "utf-8"
-	signMethod  string = "01"
-	version     string = "5.1.0"
-	baseUrl     string = "https://gateway.test.95516.com/"
+	merId      string
+	frontUrl   string
+	encoding   string = "utf-8"
+	signMethod string = "01"
+	version    string = "5.1.0"
+	baseUrl    string = "https://gateway.test.95516.com/"
 )
 
+//初始使用的配置
 type Config struct {
-	// 商户接入类型0：商户直连接入1：收单机构接入 2：平台商户接入
-	AccessType string
-	// 商户代码
-	MerId string
-	// 前台通知地址
-	FrontUrl string
-	// 渠道类型 05：语音07：互联网08：移动 16：数字机顶盒
-	ChannelType string
 	// 版本号 默认5.1.0
 	Version string
+
 	// 请求银联的地址
 	Url string
+
+	// 商户代码
+	MerId string
+
+	// 前台通知地址
+	FrontUrl string
+
+	// pfx 证书路径,和同时传入PrivatePath和CertPath 效果一样
+	PfxPath string
+
+	// pfx 证书的密码
+	PfxPwd string
+
+	// 验签私钥证书地址，传入pfx此路径可不传
+	// openssl pkcs12 -in xxxx.pfx -nodes -out server.pem 生成为原生格式pem 私钥
+	// openssl rsa -in server.pem -out server.key  生成为rsa格式私钥文件
+	PrivatePath string
+
+	// 验签证书地址,传入pfx此路径可以不传
+	// openssl pkcs12 -in xxxx.pfx -clcerts -nokeys -out key.cert
+	CertPath string
+
+	// 加密证书地址
+	EncryptCertPath string
+}
+
+func Init(config *Config) error {
+	if err := LoadCert(config); err != nil {
+		return err
+	}
+	SetConfig(config)
+	return nil
 }
 
 // 设置用户配置
 func SetConfig(config *Config) {
-	accessType = config.AccessType
 	merId = config.MerId
 	frontUrl = config.FrontUrl
-	channelType = config.ChannelType
 	if config.Version != "" {
 		version = config.Version
 	}
@@ -49,15 +71,16 @@ func SetConfig(config *Config) {
 	}
 }
 
-func sysParams() map[string]string {
+func sysParams(c ApiConfig) map[string]string {
 	return map[string]string{
 		"version":       version,
 		"encoding":      encoding,
 		"certId":        certData.CertId,
 		"signMethod":    signMethod,
 		"encryptCertId": certData.EncryptId,
-		"accessType":    accessType,
-		"channelType":   channelType,
+		"accessType":    c.accessType,
+		"channelType":   c.channelType,
+		"bizType":       c.bizType,
 		"merId":         merId,
 	}
 }
