@@ -2,6 +2,10 @@ package unionpay
 
 import "fmt"
 
+type ApiConfig struct {
+	Url string
+}
+
 // 用户数据
 type CustomerInfo struct {
 	// 证件类型 01：身份证 02：军官证 03：护照 04：回乡证 05：台胞证 06：警官证 07：士兵证 99：其它证件
@@ -36,11 +40,14 @@ type Order struct {
 }
 
 // 初始化一个订购类
-func NewOrder(url string) (o Order, err error) {
-	fmt.Printf("%+v", certData)
+func NewOrder(c ApiConfig) (o Order, err error) {
 	if certData.CertId == "" || certData.EncryptId == "" {
 		err = fmt.Errorf("请先配置证书信息")
 		return
+	}
+	url := baseUrl
+	if c.Url != "" {
+		url = c.Url
 	}
 	return Order{bizType: "001001", url: url}, nil
 }
@@ -57,6 +64,6 @@ func (n *Order) RealNameAuth(orderid string, accNo, bindid string, customer *Cus
 	request["accNo"] = getaccNo(accNo)
 	request["customerInfo"] = getCustomerInfo(customer)
 	request["signature"], _ = Sign(request)
-	return POST(n.url, request)
+	return POST(n.url+"/gateway/api/backTransReq.do", request)
 
 }

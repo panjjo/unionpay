@@ -17,19 +17,22 @@ var (
 	encoding    string = "utf-8"
 	signMethod  string = "01"
 	version     string = "5.1.0"
+	baseUrl     string = "https://gateway.test.95516.com/"
 )
 
 type Config struct {
 	// 商户接入类型0：商户直连接入1：收单机构接入 2：平台商户接入
-	AccessType string `json:"accessType"`
+	AccessType string
 	// 商户代码
-	MerId string `json:"merId"`
+	MerId string
 	// 前台通知地址
-	FrontUrl string `json:"frontUrl"`
+	FrontUrl string
 	// 渠道类型 05：语音07：互联网08：移动 16：数字机顶盒
-	ChannelType string `json:"channelType"`
+	ChannelType string
 	// 版本号 默认5.1.0
-	Version string `json:"version"`
+	Version string
+	// 请求银联的地址
+	Url string
 }
 
 // 设置用户配置
@@ -40,6 +43,9 @@ func SetConfig(config *Config) {
 	channelType = config.ChannelType
 	if config.Version != "" {
 		version = config.Version
+	}
+	if config.Url != "" {
+		baseUrl = config.Url
 	}
 }
 

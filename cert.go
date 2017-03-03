@@ -41,9 +41,12 @@ type CertPathInfo struct {
 	PfxPwd string
 
 	// 验签私钥证书地址，传入pfx此路径可不传
+	// openssl pkcs12 -in xxxx.pfx -nodes -out server.pem 生成为原生格式pem 私钥
+	// openssl rsa -in server.pem -out server.key  生成为rsa格式私钥文件
 	PrivatePath string
 
 	// 验签证书地址,传入pfx此路径可以不传
+	// openssl pkcs12 -in xxxx.pfx -clcerts -nokeys -out key.cert
 	CertPath string
 
 	// 加密证书地址
