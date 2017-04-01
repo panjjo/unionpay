@@ -1,6 +1,9 @@
 package unionpay
 
-import "strings"
+import (
+	"fmt"
+	"strings"
+)
 
 type UnionpayData struct {
 	version       string `json:"version"`
@@ -71,8 +74,8 @@ func SetConfig(config *Config) {
 	}
 }
 
-func sysParams(c ApiConfig) map[string]string {
-	return map[string]string{
+func sysParams(c ApiConfig, data *RequestParams) map[string]string {
+	request := map[string]string{
 		"version":       version,
 		"encoding":      encoding,
 		"certId":        certData.CertId,
@@ -83,6 +86,31 @@ func sysParams(c ApiConfig) map[string]string {
 		"bizType":       c.bizType,
 		"merId":         merId,
 	}
+	if data.TnxTime == "" {
+		request["txnTime"] = getTxnTime()
+	} else {
+		request["txnTime"] = data.TnxTime
+	}
+	if data.OrderId == "" {
+		data.OrderId = randomString(10)
+	}
+	request["orderId"] = data.OrderId
+	request["accNo"] = getaccNo(data.AccNo)
+	request["customerInfo"] = getCustomerInfo(data.Customer)
+	if data.Extend != "" {
+		request["reqReserved"] = data.Extend
+	}
+	if data.Reserved != nil {
+		list := []string{}
+		for k, v := range data.Reserved {
+			list = append(list, k+"&"+v)
+		}
+		if len(list) > 0 {
+			request["reserved"] = "{" + strings.Join(list, "&") + "}"
+		}
+	}
+
+	return request
 }
 
 func getTxnTime() string {
@@ -93,6 +121,7 @@ func getaccNo(no string) string {
 	return str
 }
 func getCustomerInfo(customer *CustomerInfo) string {
+	fmt.Printf("%+v\n", customer)
 	enmap := map[string]string{}
 	other := map[string]string{}
 	m := obj2Map(*customer)

@@ -52,17 +52,21 @@ func main() {
 		//域名信息
 		Url: "https://gateway.test.95516.com",
 	})
-	//创建请求渠道类型
-	o, err := unionpay.NewOrder(unionpay.ApiConfig{})
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
-	// 调用实名认证接口
-	fmt.Println(o.RealNameAuth("12aa23232", "6226388000000095", "123456jlajflafjaljf", &unionpay.CustomerInfo{
-		"", "", "张三", "", "", "", "", "18100000000",
-	}))
+	//实例化 代付
+	payforanthoer, err := unionpay.NewPayForAnother(apiconfig)
+	fmt.Println(err)
+	customer := unionpay.CustomerInfo{}
+	customer.CustomerNm = "全渠道"
+	customer.PhoneNo = "13552535506"
+	read := unionpay.RequestParams{}
+	read.AccNo = "6216261000000000018"
+	read.Customer = &customer
+	//实名认证
+	/*result, err := payforanthoer.RealNameAuth("1233", &read)
+	fmt.Println(result, err)*/
+	//支付
+	result, err := payforanthoer.Pay(100, &read)
+	fmt.Println(result, err)
 }
-
 
 ```

@@ -1,17 +1,38 @@
 package unionpay
 
 import (
+	"crypto/md5"
 	"encoding/base64"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"net"
 	"net/http"
 	"net/url"
 	"reflect"
 	"sort"
+	"strconv"
 	"strings"
 	"time"
 )
+
+/**
+  生成随机字符串
+*/
+func randomString(lens int) string {
+	now := time.Now()
+	return makeMd5(strconv.FormatInt(now.UnixNano(), 10))[:lens]
+}
+
+/**
+  字符串md5
+*/
+func makeMd5(str string) string {
+	h := md5.New()
+	io.WriteString(h, str)
+	s := fmt.Sprintf("%x", h.Sum(nil))
+	return s
+}
 
 /**
   获取当前时间戳
@@ -126,6 +147,7 @@ func POST(requrl string, request map[string]string) (interface{}, error) {
 	}
 	defer resp.Body.Close()
 	data, err := ioutil.ReadAll(resp.Body)
+	fmt.Println(string(data))
 	if err != nil {
 		return data, err
 	}

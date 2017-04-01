@@ -36,6 +36,26 @@ type CustomerInfo struct {
 	PhoneNo string `json:"phoneNo"`
 }
 
+// 入参
+type RequestParams struct {
+	// 订单ID 默认随机长度为10的字符串
+	OrderId string
+	// 订单日期 format=20060102150405 默认当前时间
+	TnxTime string
+
+	// 账户（银行卡号）
+	AccNo string
+
+	// 用户验证信息
+	Customer *CustomerInfo
+
+	// 扩展参数 交易应答或callback时原样返回 非必填
+	Extend string
+
+	// 保留域 非必填
+	Reserved map[string]string
+}
+
 // 订购类API
 type Order struct {
 	c ApiConfig
@@ -57,16 +77,52 @@ func NewOrder(c ApiConfig) (o Order, err error) {
 }
 
 // 实名认证接口
-func (n *Order) RealNameAuth(orderid string, accNo, bindid string, customer *CustomerInfo) (result interface{}, err error) {
-	request := sysParams(n.c)
+func (n *Order) RealNameAuth(bindid string, data *RequestParams) (result interface{}, err error) {
+	request := sysParams(n.c, data)
+	request["bindId"] = bindid
 	request["txnType"] = "72"
 	request["txnSubType"] = "01"
-	request["bindId"] = bindid
-	request["txnTime"] = getTxnTime()
-	request["orderId"] = orderid
-	request["accNo"] = getaccNo(accNo)
-	request["customerInfo"] = getCustomerInfo(customer)
 	request["signature"], _ = Sign(request)
 	return POST(n.c.Url+"/gateway/api/backTransReq.do", request)
+}
 
+// 代付类API
+type PayForAnother struct {
+	c ApiConfig
+}
+
+// 初始化一个代付类
+func NewPayForAnother(c ApiConfig) (o PayForAnother, err error) {
+	if certData.CertId == "" || certData.EncryptId == "" {
+		err = fmt.Errorf("请先配置证书信息")
+		return
+	}
+	if c.Url == "" {
+		c.Url = baseUrl
+	}
+	c.bizType = "000401"
+	c.channelType = "07"
+	c.accessType = "0"
+	return PayForAnother{c}, nil
+}
+
+// 实名认证接口
+func (n *PayForAnother) RealNameAuth(bindid string, data *RequestParams) (result interface{}, err error) {
+	request := sysParams(n.c, data)
+	request["bindId"] = bindid
+	request["txnType"] = "72"
+	request["txnSubType"] = "01"
+	request["signature"], _ = Sign(request)
+	return POST(n.c.Url+"/gateway/api/backTransReq.do", request)
+}
+
+// 支付接口
+func (n *PayForAnother) Pay(amount int64, data *RequestParams) (result interface{}, err error) {
+	request := sysParams(n.c, data)
+	request["txnAmt"] = fmt.Sprintf("%d", amount)
+	request["txnType"] = "12"
+	request["txnSubType"] = "00"
+	request["currencyCode"] = "156"
+	request["signature"], _ = Sign(request)
+	return POST(n.c.Url+"/gateway/api/backTransReq.do", request)
 }
