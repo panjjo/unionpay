@@ -74,36 +74,36 @@ func obj2Map(obj interface{}) map[string]interface{} {
 }
 
 // base64 加密
-func Base64Encode(data []byte) string {
+func base64Encode(data []byte) string {
 	return base64.StdEncoding.EncodeToString(data)
 }
 
 // base64 解密
-func Base64Decode(data string) ([]byte, error) {
+func base64Decode(data string) ([]byte, error) {
 	return base64.StdEncoding.DecodeString(data)
 }
 
-type MapSorter []SortItem
+type mapSorter []sortItem
 
-type SortItem struct {
+type sortItem struct {
 	Key string      `json:"key"`
 	Val interface{} `json:"val"`
 }
 
-func (ms MapSorter) Len() int {
+func (ms mapSorter) Len() int {
 	return len(ms)
 }
-func (ms MapSorter) Less(i, j int) bool {
+func (ms mapSorter) Less(i, j int) bool {
 	return ms[i].Key < ms[j].Key // 按键排序
 }
-func (ms MapSorter) Swap(i, j int) {
+func (ms mapSorter) Swap(i, j int) {
 	ms[i], ms[j] = ms[j], ms[i]
 }
-func MapSortByKey(m map[string]string, step1, step2 string) string {
-	ms := make(MapSorter, 0, len(m))
+func mapSortByKey(m map[string]string, step1, step2 string) string {
+	ms := make(mapSorter, 0, len(m))
 
 	for k, v := range m {
-		ms = append(ms, SortItem{k, v})
+		ms = append(ms, sortItem{k, v})
 	}
 	sort.Sort(ms)
 	s := []string{}
@@ -112,7 +112,7 @@ func MapSortByKey(m map[string]string, step1, step2 string) string {
 	}
 	return strings.Join(s, step2)
 }
-func TimeoutClient() *http.Client {
+func timeoutClient() *http.Client {
 	connectTimeout := time.Duration(20 * time.Second)
 	readWriteTimeout := time.Duration(30 * time.Second)
 	return &http.Client{
@@ -136,8 +136,8 @@ func timeoutDialer(cTimeout time.Duration,
 }
 
 // 发送post请求
-func POST(requrl string, request map[string]string) (interface{}, error) {
-	c := TimeoutClient()
+func post(requrl string, request map[string]string) (interface{}, error) {
+	c := timeoutClient()
 	resp, err := c.Post(requrl, "application/x-www-form-urlencoded", strings.NewReader(Http_build_query(request)))
 	if err != nil {
 		return resp, err
@@ -147,7 +147,6 @@ func POST(requrl string, request map[string]string) (interface{}, error) {
 	}
 	defer resp.Body.Close()
 	data, err := ioutil.ReadAll(resp.Body)
-	fmt.Println(string(data))
 	if err != nil {
 		return data, err
 	}

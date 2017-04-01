@@ -1,9 +1,6 @@
 package unionpay
 
-import (
-	"fmt"
-	"strings"
-)
+import "strings"
 
 type UnionpayData struct {
 	version       string `json:"version"`
@@ -121,7 +118,6 @@ func getaccNo(no string) string {
 	return str
 }
 func getCustomerInfo(customer *CustomerInfo) string {
-	fmt.Printf("%+v\n", customer)
 	enmap := map[string]string{}
 	other := map[string]string{}
 	m := obj2Map(*customer)
@@ -147,5 +143,5 @@ func getCustomerInfo(customer *CustomerInfo) string {
 	for k, v := range other {
 		tmp = append(tmp, k+"="+v)
 	}
-	return Base64Encode([]byte("{" + strings.Join(tmp, "&") + "}"))
+	return base64Encode([]byte("{" + strings.Join(tmp, "&") + "}"))
 }

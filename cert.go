@@ -37,7 +37,6 @@ func LoadCert(info *Config) (err error) {
 	certData = &Cert{}
 	certData.EncryptCert, err = ParseCertificateFromFile(info.EncryptCertPath)
 	if err != nil {
-		fmt.Println(info.EncryptCertPath)
 		err = fmt.Errorf("encryptCert ERR:%v", err)
 		return
 	}
@@ -145,20 +144,20 @@ func EncryptData(data string) (res string, err error) {
 	}
 	rng := rand.Reader
 	signer, err := rsa.EncryptPKCS1v15(rng, certData.Public, []byte(data))
-	res = Base64Encode(signer)
+	res = base64Encode(signer)
 	return
 }
 
 // sign 做签
 func Sign(request map[string]string) (string, error) {
-	str := MapSortByKey(request, "=", "&")
+	str := mapSortByKey(request, "=", "&")
 	rng := rand.Reader
 	hashed := sha256.Sum256([]byte(fmt.Sprintf("%x", sha256.Sum256([]byte(str)))))
 	signer, err := rsa.SignPKCS1v15(rng, certData.Private, crypto.SHA256, hashed[:])
 	if err != nil {
 		return "", err
 	}
-	return Base64Encode(signer), nil
+	return base64Encode(signer), nil
 }
 
 // 返回数据验签
@@ -175,10 +174,10 @@ func Verify(vals url.Values) (res interface{}, err error) {
 		}
 		kvs[k] = vals.Get(k)
 	}
-	str := MapSortByKey(kvs, "=", "&")
+	str := mapSortByKey(kvs, "=", "&")
 	hashed := sha256.Sum256([]byte(fmt.Sprintf("%x", sha256.Sum256([]byte(str)))))
 	var inSign []byte
-	inSign, err = Base64Decode(signature)
+	inSign, err = base64Decode(signature)
 	if err != nil {
 		return nil, fmt.Errorf("解析返回signature失败 %v", err)
 	}

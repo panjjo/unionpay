@@ -83,7 +83,7 @@ func (n *Order) RealNameAuth(bindid string, data *RequestParams) (result interfa
 	request["txnType"] = "72"
 	request["txnSubType"] = "01"
 	request["signature"], _ = Sign(request)
-	return POST(n.c.Url+"/gateway/api/backTransReq.do", request)
+	return post(n.c.Url+"/gateway/api/backTransReq.do", request)
 }
 
 // 代付类API
@@ -113,7 +113,7 @@ func (n *PayForAnother) RealNameAuth(bindid string, data *RequestParams) (result
 	request["txnType"] = "72"
 	request["txnSubType"] = "01"
 	request["signature"], _ = Sign(request)
-	return POST(n.c.Url+"/gateway/api/backTransReq.do", request)
+	return post(n.c.Url+"/gateway/api/backTransReq.do", request)
 }
 
 // 支付接口
@@ -124,5 +124,5 @@ func (n *PayForAnother) Pay(amount int64, data *RequestParams) (result interface
 	request["txnSubType"] = "00"
 	request["currencyCode"] = "156"
 	request["signature"], _ = Sign(request)
-	return POST(n.c.Url+"/gateway/api/backTransReq.do", request)
+	return post(n.c.Url+"/gateway/api/backTransReq.do", request)
 }
