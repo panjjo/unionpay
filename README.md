@@ -17,7 +17,7 @@ func main() {
 	var err error
 	//初始化证书
 	//pfxpath和pfxpwd同时存在，privatepath和certpath同时存在，两组传任意一组皆可
-	err = unionpay.LoadCert(&unionpay.CertPathInfo{
+	err = unionpay.LoadCert(&unionpay.Config{
 
 		//银联提供的pfx证书存放路径,商户私钥
 		PfxPath: "/tmp/up/700000000000001_acp.pfx",
@@ -45,15 +45,14 @@ func main() {
 	unionpay.SetConfig(&unionpay.Config{
 		// 商户号
 		MerId: "777290058143951",
-		// 频道类型
-		ChannelType: "07",
-		// 商户接入类型
-		AccessType: "0",
 		//域名信息
 		Url: "https://gateway.test.95516.com",
 	})
 	//实例化 代付
-	payforanthoer, err := unionpay.NewPayForAnother(apiconfig)
+	payforanthoer, err := unionpay.NewPayForAnother(unionpay.ApiConfig{
+		//域名信息
+		Url: "https://gateway.test.95516.com",
+	})
 	fmt.Println(err)
 	customer := unionpay.CustomerInfo{}
 	customer.CustomerNm = "全渠道"
